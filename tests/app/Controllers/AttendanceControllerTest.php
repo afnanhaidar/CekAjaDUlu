@@ -18,36 +18,26 @@ class AttendanceControllerTest extends CIUnitTestCase
     {
         parent::setUp();
 
-        $database = db_connect();
-        $names = [];
-
-        for ($number = 1; $number <= 5; $number++) {
-            $names[] = [
-                'name' => 'Murid Uji Presensi ' . $number,
-                'created_at' => date('Y-m-d H:i:s'),
-            ];
-        }
-
-        $database->table('students')->insertBatch($names);
-        $students = $database->table('students')
+        $students = db_connect()
+            ->table('students')
             ->select('id')
-            ->like('name', 'Murid Uji Presensi ', 'after')
-            ->orderBy('id', 'DESC')
+            ->orderBy('id', 'ASC')
             ->get(5)
             ->getResultArray();
 
-        $this->studentIds = array_reverse(
-            array_map(static fn (array $student): int => (int) $student['id'], $students)
+        $this->studentIds = array_map(
+            static fn (array $student): int => (int) $student['id'],
+            $students
         );
+
+        $this->assertCount(5, $this->studentIds, 'Seed lima data murid harus tersedia untuk pengujian.');
+        db_connect()->table('attendances')->whereIn('student_id', $this->studentIds)->delete();
     }
 
     protected function tearDown(): void
     {
-        $database = db_connect();
-
         if ($this->studentIds !== []) {
-            $database->table('attendances')->whereIn('student_id', $this->studentIds)->delete();
-            $database->table('students')->whereIn('id', $this->studentIds)->delete();
+            db_connect()->table('attendances')->whereIn('student_id', $this->studentIds)->delete();
         }
 
         parent::tearDown();
@@ -63,6 +53,7 @@ class AttendanceControllerTest extends CIUnitTestCase
         ]);
 
         $response->assertRedirectTo('/presensi');
+        $response->assertSessionHas('success', 'Presensi berhasil disimpan!');
 
         $database = db_connect();
         $this->assertSame(

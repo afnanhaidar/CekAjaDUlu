@@ -26,4 +26,22 @@ class AttendanceModel extends Model
             'in_list'  => 'Status kehadiran harus Hadir, Sakit, Izin, atau Alpa.',
         ],
     ];
+
+    /**
+     * Menyimpan data presensi berdasarkan kunci unik murid dan tanggal.
+     *
+     * @param list<array<string, int|string>> $attendances
+     */
+    public function upsertBatch(array $attendances): bool
+    {
+        if ($attendances === []) {
+            return true;
+        }
+
+        $result = $this->builder()
+            ->onConstraint(['student_id', 'attendance_date'])
+            ->upsertBatch($attendances);
+
+        return $result !== false;
+    }
 }

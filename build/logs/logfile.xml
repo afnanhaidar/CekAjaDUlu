@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\laragon\www\CekAjaDUlu\phpunit.dist.xml" tests="7" assertions="13" errors="0" failures="0" skipped="0" time="0.121622">
+    <testsuite name="App" tests="7" assertions="13" errors="0" failures="0" skipped="0" time="0.121622">
+      <testsuite name="ExampleDatabaseTest" file="C:\laragon\www\CekAjaDUlu\tests\database\ExampleDatabaseTest.php" tests="2" assertions="3" errors="0" failures="0" skipped="0" time="0.096056">
+        <testcase name="testModelFindAll" file="C:\laragon\www\CekAjaDUlu\tests\database\ExampleDatabaseTest.php" line="17" class="ExampleDatabaseTest" classname="ExampleDatabaseTest" assertions="1" time="0.081999"/>
+        <testcase name="testSoftDeleteLeavesRow" file="C:\laragon\www\CekAjaDUlu\tests\database\ExampleDatabaseTest.php" line="28" class="ExampleDatabaseTest" classname="ExampleDatabaseTest" assertions="2" time="0.014057"/>
+      </testsuite>
+      <testsuite name="ExampleSessionTest" file="C:\laragon\www\CekAjaDUlu\tests\session\ExampleSessionTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001494">
+        <testcase name="testSessionSimple" file="C:\laragon\www\CekAjaDUlu\tests\session\ExampleSessionTest.php" line="10" class="ExampleSessionTest" classname="ExampleSessionTest" assertions="1" time="0.001494"/>
+      </testsuite>
+      <testsuite name="AttendanceModelTest" file="C:\laragon\www\CekAjaDUlu\tests\unit\AttendanceModelTest.php" tests="2" assertions="6" errors="0" failures="0" skipped="0" time="0.020334">
+        <testcase name="testAcceptsEachValidAttendanceStatus" file="C:\laragon\www\CekAjaDUlu\tests\unit\AttendanceModelTest.php" line="11" class="AttendanceModelTest" classname="AttendanceModelTest" assertions="4" time="0.017355"/>
+        <testcase name="testRejectsAnInvalidAttendanceStatus" file="C:\laragon\www\CekAjaDUlu\tests\unit\AttendanceModelTest.php" line="26" class="AttendanceModelTest" classname="AttendanceModelTest" assertions="2" time="0.002978"/>
+      </testsuite>
+      <testsuite name="HealthTest" file="C:\laragon\www\CekAjaDUlu\tests\unit\HealthTest.php" tests="2" assertions="3" errors="0" failures="0" skipped="0" time="0.003739">
+        <testcase name="testIsDefinedAppPath" file="C:\laragon\www\CekAjaDUlu\tests\unit\HealthTest.php" line="12" class="HealthTest" classname="HealthTest" assertions="1" time="0.001597"/>
+        <testcase name="testBaseUrlHasBeenSet" file="C:\laragon\www\CekAjaDUlu\tests\unit\HealthTest.php" line="17" class="HealthTest" classname="HealthTest" assertions="2" time="0.002142"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

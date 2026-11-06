@@ -8,6 +8,15 @@
 </head>
 <body class="bg-light">
     <main class="container py-4">
+        <?php
+        $statusClasses = [
+            ''      => 'bg-secondary-subtle text-secondary-emphasis',
+            'Hadir' => 'bg-success-subtle text-success-emphasis',
+            'Sakit' => 'bg-warning-subtle text-warning-emphasis',
+            'Izin'  => 'bg-info-subtle text-info-emphasis',
+            'Alpa'  => 'bg-danger-subtle text-danger-emphasis',
+        ];
+        ?>
         <h1 class="h2 mb-1">Presensi Mingguan Guru</h1>
         <p class="text-muted mb-4">
             Rentang tanggal aktif: <?= esc($dates[0]) ?> sampai <?= esc($dates[6]) ?>
@@ -22,6 +31,12 @@
         <?php if (session()->getFlashdata('error') !== null): ?>
             <div class="alert alert-danger" role="alert">
                 <?= esc(session()->getFlashdata('error')) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (session()->getFlashdata('warning') !== null): ?>
+            <div class="alert alert-warning" role="alert">
+                <?= esc(session()->getFlashdata('warning')) ?>
             </div>
         <?php endif; ?>
 
@@ -53,7 +68,7 @@
                                             <?= esc('Presensi ' . $student['name'] . ' pada ' . $date) ?>
                                         </label>
                                         <select
-                                            class="form-select form-select-sm"
+                                            class="form-select form-select-sm <?= esc($statusClasses[$selectedStatus] ?? $statusClasses['']) ?>"
                                             id="attendance-<?= esc((string) $studentId) ?>-<?= esc($date) ?>"
                                             name="<?= esc('attendance[' . $studentId . '][' . $date . ']') ?>"
                                         >

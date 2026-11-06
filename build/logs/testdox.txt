@@ -1,6 +1,7 @@
 Attendance Controller
  [x] Builds seven dates starting today
  [x] Counts only present statuses
+ [x] Retains valid attendance when other cells are invalid
 
 Attendance Model
  [x] Accepts each valid attendance status

@@ -41,6 +41,42 @@ final class AttendanceControllerTest extends CIUnitTestCase
 
         $this->assertSame(3, $total);
     }
+
+    public function testRetainsValidAttendanceWhenOtherCellsAreInvalid(): void
+    {
+        $controller = new TestableAttendanceController();
+
+        $prepared = $controller->prepareRecords(
+            [
+                1 => [
+                    '2026-11-06' => 'Hadir',
+                    '2026-11-07' => 'Terlambat',
+                    '2026-11-15' => 'Sakit',
+                ],
+                99 => [
+                    '2026-11-06' => 'Izin',
+                ],
+            ],
+            [1 => 0],
+            [
+                '2026-11-06' => 0,
+                '2026-11-07' => 1,
+            ],
+            '2026-11-06 08:00:00'
+        );
+
+        $this->assertSame([
+            [
+                'student_id'      => 1,
+                'attendance_date' => '2026-11-06',
+                'status'          => 'Hadir',
+                'updated_at'      => '2026-11-06 08:00:00',
+            ],
+        ], $prepared['records']);
+        $this->assertContains('Status kehadiran tidak valid.', $prepared['errors']);
+        $this->assertContains('Tanggal presensi di luar rentang tujuh hari aktif.', $prepared['errors']);
+        $this->assertContains('Murid tidak ditemukan.', $prepared['errors']);
+    }
 }
 
 final class TestableAttendanceController extends AttendanceController
@@ -59,5 +95,25 @@ final class TestableAttendanceController extends AttendanceController
     public function presentTotal(array $statuses): int
     {
         return $this->countPresentStatuses($statuses);
+    }
+
+    /**
+     * @param array<mixed>       $submittedAttendance
+     * @param array<int, int>    $validStudentIds
+     * @param array<string, int> $validDates
+     * @return array{records: list<array<string, int|string>>, errors: list<string>}
+     */
+    public function prepareRecords(
+        array $submittedAttendance,
+        array $validStudentIds,
+        array $validDates,
+        string $updatedAt
+    ): array {
+        return $this->prepareAttendanceRecords(
+            $submittedAttendance,
+            $validStudentIds,
+            $validDates,
+            $updatedAt
+        );
     }
 }

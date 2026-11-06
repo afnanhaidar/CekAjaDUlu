@@ -6,6 +6,7 @@ use App\Models\AttendanceModel;
 use App\Models\StudentModel;
 use DateTimeImmutable;
 use DateTimeZone;
+use RuntimeException;
 use Throwable;
 
 class AttendanceController extends BaseController
@@ -56,7 +57,6 @@ class AttendanceController extends BaseController
     {
         $dates = $this->buildDateRange($this->todayInJakarta());
         $validDates = array_flip($dates);
-        $validStatuses = ['Hadir', 'Sakit', 'Izin', 'Alpa'];
         $submittedAttendance = $this->request->getPost('attendance');
 
         if (! is_array($submittedAttendance)) {
@@ -68,35 +68,14 @@ class AttendanceController extends BaseController
             static fn (array $student): int => (int) $student['id'],
             $students
         ));
-        $attendances = [];
-
-        foreach ($submittedAttendance as $studentId => $dailyAttendance) {
-            $studentId = filter_var($studentId, FILTER_VALIDATE_INT, [
-                'options' => ['min_range' => 1],
-            ]);
-
-            if ($studentId === false || ! isset($validStudentIds[$studentId]) || ! is_array($dailyAttendance)) {
-                return redirect()->to('/presensi')->with('error', 'Data presensi tidak valid.');
-            }
-
-            foreach ($dailyAttendance as $date => $status) {
-                if ($status === '') {
-                    continue;
-                }
-
-                if (! is_string($date) || ! isset($validDates[$date]) || ! is_string($status)
-                    || ! in_array($status, $validStatuses, true)) {
-                    return redirect()->to('/presensi')->with('error', 'Data presensi tidak valid.');
-                }
-
-                $attendances[] = [
-                    'student_id'      => $studentId,
-                    'attendance_date' => $date,
-                    'status'          => $status,
-                    'updated_at'      => $this->nowInJakarta()->format('Y-m-d H:i:s'),
-                ];
-            }
-        }
+        $preparedAttendance = $this->prepareAttendanceRecords(
+            $submittedAttendance,
+            $validStudentIds,
+            $validDates,
+            $this->nowInJakarta()->format('Y-m-d H:i:s')
+        );
+        $attendances = $preparedAttendance['records'];
+        $validationErrors = array_values(array_unique($preparedAttendance['errors']));
 
         $database = db_connect();
         $database->transStart();
@@ -117,7 +96,17 @@ class AttendanceController extends BaseController
             return redirect()->to('/presensi')->with('error', 'Presensi gagal disimpan.');
         }
 
-        return redirect()->to('/presensi')->with('success', 'Presensi berhasil disimpan!');
+        $redirect = redirect()->to('/presensi');
+
+        if ($attendances !== [] || $validationErrors === []) {
+            $redirect = $redirect->with('success', 'Presensi berhasil disimpan!');
+        }
+
+        if ($validationErrors !== []) {
+            return $redirect->with('warning', implode(' ', $validationErrors));
+        }
+
+        return $redirect;
     }
 
     /**
@@ -143,6 +132,73 @@ class AttendanceController extends BaseController
             $statuses,
             static fn (string $status): bool => $status === 'Hadir'
         ));
+    }
+
+    /**
+     * Memisahkan data presensi yang dapat disimpan dari data yang tidak valid.
+     *
+     * @param array<mixed>              $submittedAttendance
+     * @param array<int, int>           $validStudentIds
+     * @param array<string, int>        $validDates
+     * @return array{records: list<array<string, int|string>>, errors: list<string>}
+     */
+    protected function prepareAttendanceRecords(
+        array $submittedAttendance,
+        array $validStudentIds,
+        array $validDates,
+        string $updatedAt
+    ): array {
+        $validStatuses = ['Hadir', 'Sakit', 'Izin', 'Alpa'];
+        $records = [];
+        $errors = [];
+
+        foreach ($submittedAttendance as $studentId => $dailyAttendance) {
+            $studentId = filter_var($studentId, FILTER_VALIDATE_INT, [
+                'options' => ['min_range' => 1],
+            ]);
+
+            if ($studentId === false || ! isset($validStudentIds[$studentId])) {
+                $errors[] = 'Murid tidak ditemukan.';
+
+                continue;
+            }
+
+            if (! is_array($dailyAttendance)) {
+                $errors[] = 'Data presensi tidak valid.';
+
+                continue;
+            }
+
+            foreach ($dailyAttendance as $date => $status) {
+                if ($status === '') {
+                    continue;
+                }
+
+                if (! is_string($date) || ! isset($validDates[$date])) {
+                    $errors[] = 'Tanggal presensi di luar rentang tujuh hari aktif.';
+
+                    continue;
+                }
+
+                if (! is_string($status) || ! in_array($status, $validStatuses, true)) {
+                    $errors[] = 'Status kehadiran tidak valid.';
+
+                    continue;
+                }
+
+                $records[] = [
+                    'student_id'      => $studentId,
+                    'attendance_date' => $date,
+                    'status'          => $status,
+                    'updated_at'      => $updatedAt,
+                ];
+            }
+        }
+
+        return [
+            'records' => $records,
+            'errors'  => $errors,
+        ];
     }
 
     protected function todayInJakarta(): DateTimeImmutable

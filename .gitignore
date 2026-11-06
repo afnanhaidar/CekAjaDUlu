@@ -3,3 +3,4 @@
 /writable/*
 !/writable/index.html
 !/writable/.gitkeep
+/build/

@@ -3,4 +3,11 @@
 /writable/*
 !/writable/index.html
 !/writable/.gitkeep
+/writable/uploads/
+!/writable/uploads/
+/writable/uploads/*
+!/writable/uploads/surat/
+!/writable/uploads/surat/.gitkeep
 /build/
+/writable/uploads/surat/*
+!/writable/uploads/surat/.gitkeep

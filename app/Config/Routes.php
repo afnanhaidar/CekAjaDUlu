@@ -6,3 +6,4 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 $routes->get('presensi', 'AttendanceController::index');
 $routes->post('presensi/save', 'AttendanceController::save', ['filter' => 'csrf']);
+$routes->post('presensi/upload', 'AttendanceController::upload', ['filter' => 'csrf']);

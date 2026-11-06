@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\AttendanceModel;
 use App\Models\StudentModel;
+use CodeIgniter\HTTP\Files\UploadedFile;
+use CodeIgniter\HTTP\RedirectResponse;
 use DateTimeImmutable;
 use DateTimeZone;
 use RuntimeException;
@@ -11,6 +13,8 @@ use Throwable;
 
 class AttendanceController extends BaseController
 {
+    private const UPLOAD_DIRECTORY = 'uploads/surat/';
+
     /**
      * Menampilkan matriks presensi untuk tujuh hari aktif.
      *
@@ -107,6 +111,32 @@ class AttendanceController extends BaseController
         }
 
         return $redirect;
+    }
+
+    /**
+     * Mengunggah foto surat ke penyimpanan di luar folder public.
+     */
+    public function upload(): RedirectResponse
+    {
+        $validationError = $this->photoUploadValidationError();
+
+        if ($validationError !== null) {
+            return redirect()->to('/presensi')->with('error', $validationError);
+        }
+
+        $file = $this->uploadedPhoto();
+
+        if ($file === null || ! $file->isValid()) {
+            return redirect()->to('/presensi')->with('error', 'Foto surat tidak valid.');
+        }
+
+        try {
+            $this->storeUploadedPhoto($file);
+        } catch (Throwable) {
+            return redirect()->to('/presensi')->with('error', 'Foto surat gagal diunggah.');
+        }
+
+        return redirect()->to('/presensi')->with('success', 'Foto berhasil diunggah');
     }
 
     /**
@@ -209,5 +239,55 @@ class AttendanceController extends BaseController
     protected function nowInJakarta(): DateTimeImmutable
     {
         return new DateTimeImmutable('now', new DateTimeZone('Asia/Jakarta'));
+    }
+
+    /**
+     * @return array<string, array{label: string, rules: list<string>, errors: array<string, string>}>
+     */
+    protected function photoValidationRules(): array
+    {
+        return [
+            'surat' => [
+                'label' => 'Foto Surat',
+                'rules' => [
+                    'uploaded[surat]',
+                    'is_image[surat]',
+                    'mime_in[surat,image/jpg,image/jpeg,image/png]',
+                    'max_size[surat,2048]',
+                ],
+                'errors' => [
+                    'uploaded'  => 'Foto surat wajib dipilih.',
+                    'is_image'  => 'Foto surat harus berupa gambar.',
+                    'mime_in'   => 'Foto surat harus berformat JPEG atau PNG.',
+                    'max_size'  => 'Ukuran foto surat maksimal 2 MB.',
+                ],
+            ],
+        ];
+    }
+
+    protected function photoUploadValidationError(): ?string
+    {
+        if ($this->validateData([], $this->photoValidationRules())) {
+            return null;
+        }
+
+        return $this->validator->getError('surat') ?? 'Foto surat tidak valid.';
+    }
+
+    protected function uploadedPhoto(): ?UploadedFile
+    {
+        return $this->request->getFile('surat');
+    }
+
+    protected function storeUploadedPhoto(UploadedFile $file): void
+    {
+        $file->move($this->uploadDirectoryPath(), $file->getRandomName());
+    }
+
+    protected function uploadDirectoryPath(): string
+    {
+        $writablePath = defined('WRITABLEPATH') ? WRITABLEPATH : WRITEPATH;
+
+        return $writablePath . self::UPLOAD_DIRECTORY;
     }
 }

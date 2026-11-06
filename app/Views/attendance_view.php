@@ -90,6 +90,42 @@
 
             <button type="submit" class="btn btn-primary">Simpan Presensi</button>
         </form>
+
+        <section class="card mt-4">
+            <div class="card-body">
+                <h2 class="h5">Ambil Foto Surat</h2>
+                <form id="photo-upload-form" action="<?= esc(site_url('presensi/upload')) ?>" method="post" enctype="multipart/form-data">
+                    <?= csrf_field() ?>
+
+                    <div id="camera-message" class="alert alert-warning d-none" role="alert"></div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" id="activate-camera" class="btn btn-outline-secondary">Aktifkan Kamera</button>
+                        <button type="button" id="capture-photo" class="btn btn-primary" disabled>Ambil Foto</button>
+                        <button type="button" id="retake-photo" class="btn btn-outline-secondary d-none">Ulangi</button>
+                    </div>
+
+                    <video id="camera-preview" class="w-100 rounded border mb-3" autoplay playsinline hidden></video>
+                    <canvas id="photo-canvas" hidden></canvas>
+                    <img id="photo-preview" class="img-fluid rounded border mb-3" alt="Pratinjau foto surat" hidden>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="surat">Pilih Foto dari Perangkat</label>
+                        <input
+                            class="form-control"
+                            type="file"
+                            id="surat"
+                            name="surat"
+                            accept="image/jpeg,image/png"
+                            capture="environment"
+                            required
+                        >
+                    </div>
+                    <button type="submit" id="upload-photo" class="btn btn-outline-secondary" disabled>Unggah Foto</button>
+                </form>
+            </div>
+        </section>
     </main>
+    <script src="<?= esc(base_url('js/camera.js')) ?>" defer></script>
 </body>
 </html>

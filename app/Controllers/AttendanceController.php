@@ -11,6 +11,8 @@ use Throwable;
 
 class AttendanceController extends BaseController
 {
+    private const SIX_ITB_URL = 'http://six.itb.ac.id/';
+
     /**
      * Menampilkan matriks presensi untuk tujuh hari aktif.
      *
@@ -47,6 +49,7 @@ class AttendanceController extends BaseController
             'dates'                 => $dates,
             'attendanceByStudent'   => $attendanceByStudent,
             'totalPresentByStudent' => $totalPresentByStudent,
+            'sixItbUrl'             => self::SIX_ITB_URL,
         ]);
     }
 

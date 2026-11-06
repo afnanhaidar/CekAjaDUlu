@@ -17,7 +17,15 @@
             'Alpa'  => 'bg-danger-subtle text-danger-emphasis',
         ];
         ?>
-        <h1 class="h2 mb-1">Presensi Mingguan Guru</h1>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+            <h1 class="h2 mb-0">Presensi Mingguan Guru</h1>
+            <a
+                class="btn btn-outline-secondary"
+                href="<?= esc($sixItbUrl) ?>"
+                target="_blank"
+                rel="noopener noreferrer"
+            >Kunjungi SIX ITB</a>
+        </div>
         <p class="text-muted mb-4">
             Rentang tanggal aktif: <?= esc($dates[0]) ?> sampai <?= esc($dates[6]) ?>
         </p>
